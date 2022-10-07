@@ -1,0 +1,5 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^.vscode.*$
+^README.Rmd$
+^README_files.*$
