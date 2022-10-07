@@ -1,9 +1,11 @@
 # Experiment: Preallocate buffers in base-R serialization
 
 This is a test implementation of R’s serialization memory buffers, that
-uses `object.size` to preallocate some memory.
+uses `object.size` to preallocate memory buffers.
 
 R-base serialize needs a lot of re-allocations with larger data:
+
+    set.seed(pi)
 
     invisible(
       serializeprealloc::serialize_prealloc(runif(1000000), prealloc = FALSE, trace = TRUE)
@@ -42,12 +44,20 @@ R-base serialize needs a lot of re-allocations with larger data:
       df
     }
 
+This benchmark tests a variety of object sizes (numeric vectors of size
+1 to 10^8)
+
     df <- do.call(rbind, lapply(seq(0, 8, by = 0.5), function(i) {
       
       nreps <- if (i < 4) 10000 else if (i < 6) 1000 else if (i < 8) 10 else 1
 
       ben(runif(10^i), num_reps = nreps)
     }))
+
+<details>
+<summary>
+Output dataframe (long)
+</summary>
 
     df |> knitr::kable(row.names = F)
 
@@ -80,48 +90,48 @@ R-base serialize needs a lot of re-allocations with larger data:
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">base-r</td>
-<td style="text-align: right;">10000</td>
-<td style="text-align: right;">0.06</td>
-<td style="text-align: right;">1.000</td>
-<td style="text-align: right;">0.03</td>
-<td style="text-align: right;">0.03</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">5.468750e-02</td>
-<td style="text-align: right;">0.0086923</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">prealloc</td>
-<td style="text-align: right;">10000</td>
-<td style="text-align: right;">0.06</td>
-<td style="text-align: right;">1.000</td>
-<td style="text-align: right;">0.04</td>
-<td style="text-align: right;">0.01</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">5.468750e-02</td>
-<td style="text-align: right;">0.0086923</td>
-</tr>
-<tr class="odd">
 <td style="text-align: left;">control</td>
 <td style="text-align: right;">10000</td>
 <td style="text-align: right;">0.06</td>
 <td style="text-align: right;">1.000</td>
-<td style="text-align: right;">0.04</td>
-<td style="text-align: right;">0.02</td>
+<td style="text-align: right;">0.06</td>
+<td style="text-align: right;">0.00</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">5.468750e-02</td>
 <td style="text-align: right;">0.0086923</td>
 </tr>
 <tr class="even">
+<td style="text-align: left;">prealloc</td>
+<td style="text-align: right;">10000</td>
+<td style="text-align: right;">0.07</td>
+<td style="text-align: right;">1.167</td>
+<td style="text-align: right;">0.05</td>
+<td style="text-align: right;">0.01</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">5.468750e-02</td>
+<td style="text-align: right;">0.0074506</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">base-r</td>
+<td style="text-align: right;">10000</td>
+<td style="text-align: right;">0.07</td>
+<td style="text-align: right;">1.167</td>
+<td style="text-align: right;">0.02</td>
+<td style="text-align: right;">0.05</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">5.468750e-02</td>
+<td style="text-align: right;">0.0074506</td>
+</tr>
+<tr class="even">
 <td style="text-align: left;">base-r</td>
 <td style="text-align: right;">10000</td>
 <td style="text-align: right;">0.05</td>
 <td style="text-align: right;">1.000</td>
-<td style="text-align: right;">0.04</td>
-<td style="text-align: right;">0.01</td>
+<td style="text-align: right;">0.05</td>
+<td style="text-align: right;">0.00</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">7.812500e-02</td>
@@ -130,22 +140,22 @@ R-base serialize needs a lot of re-allocations with larger data:
 <tr class="odd">
 <td style="text-align: left;">prealloc</td>
 <td style="text-align: right;">10000</td>
+<td style="text-align: right;">0.06</td>
+<td style="text-align: right;">1.200</td>
 <td style="text-align: right;">0.05</td>
-<td style="text-align: right;">1.000</td>
-<td style="text-align: right;">0.03</td>
-<td style="text-align: right;">0.01</td>
+<td style="text-align: right;">0.02</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">7.812500e-02</td>
-<td style="text-align: right;">0.0149012</td>
+<td style="text-align: right;">0.0124176</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">control</td>
 <td style="text-align: right;">10000</td>
 <td style="text-align: right;">0.06</td>
 <td style="text-align: right;">1.200</td>
-<td style="text-align: right;">0.04</td>
-<td style="text-align: right;">0.02</td>
+<td style="text-align: right;">0.06</td>
+<td style="text-align: right;">0.00</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">7.812500e-02</td>
@@ -156,7 +166,7 @@ R-base serialize needs a lot of re-allocations with larger data:
 <td style="text-align: right;">10000</td>
 <td style="text-align: right;">0.03</td>
 <td style="text-align: right;">1.000</td>
-<td style="text-align: right;">0.03</td>
+<td style="text-align: right;">0.04</td>
 <td style="text-align: right;">0.00</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
@@ -166,22 +176,22 @@ R-base serialize needs a lot of re-allocations with larger data:
 <tr class="even">
 <td style="text-align: left;">prealloc</td>
 <td style="text-align: right;">10000</td>
-<td style="text-align: right;">0.05</td>
-<td style="text-align: right;">1.667</td>
 <td style="text-align: right;">0.04</td>
-<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">1.333</td>
+<td style="text-align: right;">0.03</td>
+<td style="text-align: right;">0.02</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">1.718750e-01</td>
-<td style="text-align: right;">0.0327826</td>
+<td style="text-align: right;">0.0409782</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">control</td>
 <td style="text-align: right;">10000</td>
 <td style="text-align: right;">0.06</td>
 <td style="text-align: right;">2.000</td>
-<td style="text-align: right;">0.05</td>
-<td style="text-align: right;">0.02</td>
+<td style="text-align: right;">0.06</td>
+<td style="text-align: right;">0.00</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">1.718750e-01</td>
@@ -190,8 +200,32 @@ R-base serialize needs a lot of re-allocations with larger data:
 <tr class="even">
 <td style="text-align: left;">base-r</td>
 <td style="text-align: right;">10000</td>
-<td style="text-align: right;">0.05</td>
+<td style="text-align: right;">0.04</td>
 <td style="text-align: right;">1.000</td>
+<td style="text-align: right;">0.04</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">2.890625e-01</td>
+<td style="text-align: right;">0.0689179</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">control</td>
+<td style="text-align: right;">10000</td>
+<td style="text-align: right;">0.04</td>
+<td style="text-align: right;">1.000</td>
+<td style="text-align: right;">0.03</td>
+<td style="text-align: right;">0.02</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">2.890625e-01</td>
+<td style="text-align: right;">0.0689179</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">prealloc</td>
+<td style="text-align: right;">10000</td>
+<td style="text-align: right;">0.05</td>
+<td style="text-align: right;">1.250</td>
 <td style="text-align: right;">0.05</td>
 <td style="text-align: right;">0.00</td>
 <td style="text-align: right;">NA</td>
@@ -202,44 +236,32 @@ R-base serialize needs a lot of re-allocations with larger data:
 <tr class="odd">
 <td style="text-align: left;">prealloc</td>
 <td style="text-align: right;">10000</td>
-<td style="text-align: right;">0.06</td>
-<td style="text-align: right;">1.200</td>
-<td style="text-align: right;">0.05</td>
+<td style="text-align: right;">0.04</td>
+<td style="text-align: right;">1.000</td>
+<td style="text-align: right;">0.03</td>
 <td style="text-align: right;">0.02</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
-<td style="text-align: right;">2.890625e-01</td>
-<td style="text-align: right;">0.0459452</td>
+<td style="text-align: right;">8.281250e-01</td>
+<td style="text-align: right;">0.1974404</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">control</td>
 <td style="text-align: right;">10000</td>
-<td style="text-align: right;">0.07</td>
-<td style="text-align: right;">1.400</td>
-<td style="text-align: right;">0.06</td>
-<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.04</td>
+<td style="text-align: right;">1.000</td>
+<td style="text-align: right;">0.01</td>
+<td style="text-align: right;">0.03</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
-<td style="text-align: right;">2.890625e-01</td>
-<td style="text-align: right;">0.0393816</td>
+<td style="text-align: right;">8.281250e-01</td>
+<td style="text-align: right;">0.1974404</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">base-r</td>
 <td style="text-align: right;">10000</td>
 <td style="text-align: right;">0.05</td>
-<td style="text-align: right;">1.000</td>
-<td style="text-align: right;">0.05</td>
-<td style="text-align: right;">0.00</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">8.281250e-01</td>
-<td style="text-align: right;">0.1579523</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">prealloc</td>
-<td style="text-align: right;">10000</td>
-<td style="text-align: right;">0.05</td>
-<td style="text-align: right;">1.000</td>
+<td style="text-align: right;">1.250</td>
 <td style="text-align: right;">0.03</td>
 <td style="text-align: right;">0.01</td>
 <td style="text-align: right;">NA</td>
@@ -247,7 +269,31 @@ R-base serialize needs a lot of re-allocations with larger data:
 <td style="text-align: right;">8.281250e-01</td>
 <td style="text-align: right;">0.1579523</td>
 </tr>
+<tr class="even">
+<td style="text-align: left;">base-r</td>
+<td style="text-align: right;">10000</td>
+<td style="text-align: right;">0.05</td>
+<td style="text-align: right;">1.000</td>
+<td style="text-align: right;">0.01</td>
+<td style="text-align: right;">0.03</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">2.515625e+00</td>
+<td style="text-align: right;">0.4798174</td>
+</tr>
 <tr class="odd">
+<td style="text-align: left;">prealloc</td>
+<td style="text-align: right;">10000</td>
+<td style="text-align: right;">0.05</td>
+<td style="text-align: right;">1.000</td>
+<td style="text-align: right;">0.03</td>
+<td style="text-align: right;">0.02</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">2.515625e+00</td>
+<td style="text-align: right;">0.4798174</td>
+</tr>
+<tr class="even">
 <td style="text-align: left;">control</td>
 <td style="text-align: right;">10000</td>
 <td style="text-align: right;">0.06</td>
@@ -256,18 +302,6 @@ R-base serialize needs a lot of re-allocations with larger data:
 <td style="text-align: right;">0.00</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
-<td style="text-align: right;">8.281250e-01</td>
-<td style="text-align: right;">0.1316269</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">base-r</td>
-<td style="text-align: right;">10000</td>
-<td style="text-align: right;">0.06</td>
-<td style="text-align: right;">1.000</td>
-<td style="text-align: right;">0.06</td>
-<td style="text-align: right;">0.00</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">NA</td>
 <td style="text-align: right;">2.515625e+00</td>
 <td style="text-align: right;">0.3998478</td>
 </tr>
@@ -276,92 +310,68 @@ R-base serialize needs a lot of re-allocations with larger data:
 <td style="text-align: right;">10000</td>
 <td style="text-align: right;">0.06</td>
 <td style="text-align: right;">1.000</td>
-<td style="text-align: right;">0.05</td>
-<td style="text-align: right;">0.02</td>
+<td style="text-align: right;">0.03</td>
+<td style="text-align: right;">0.03</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
-<td style="text-align: right;">2.515625e+00</td>
-<td style="text-align: right;">0.3998478</td>
+<td style="text-align: right;">7.859375e+00</td>
+<td style="text-align: right;">1.2492140</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">prealloc</td>
 <td style="text-align: right;">10000</td>
 <td style="text-align: right;">0.07</td>
 <td style="text-align: right;">1.167</td>
-<td style="text-align: right;">0.08</td>
-<td style="text-align: right;">0.00</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">2.515625e+00</td>
-<td style="text-align: right;">0.3427267</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">control</td>
-<td style="text-align: right;">10000</td>
-<td style="text-align: right;">0.07</td>
-<td style="text-align: right;">1.000</td>
-<td style="text-align: right;">0.06</td>
-<td style="text-align: right;">0.01</td>
+<td style="text-align: right;">0.03</td>
+<td style="text-align: right;">0.03</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">7.859375e+00</td>
 <td style="text-align: right;">1.0707549</td>
 </tr>
-<tr class="even">
-<td style="text-align: left;">prealloc</td>
+<tr class="odd">
+<td style="text-align: left;">base-r</td>
 <td style="text-align: right;">10000</td>
 <td style="text-align: right;">0.08</td>
-<td style="text-align: right;">1.143</td>
-<td style="text-align: right;">0.07</td>
-<td style="text-align: right;">0.02</td>
+<td style="text-align: right;">1.333</td>
+<td style="text-align: right;">0.08</td>
+<td style="text-align: right;">0.00</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">7.859375e+00</td>
 <td style="text-align: right;">0.9369105</td>
 </tr>
-<tr class="odd">
-<td style="text-align: left;">base-r</td>
-<td style="text-align: right;">10000</td>
-<td style="text-align: right;">0.10</td>
-<td style="text-align: right;">1.429</td>
-<td style="text-align: right;">0.08</td>
-<td style="text-align: right;">0.01</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">7.859375e+00</td>
-<td style="text-align: right;">0.7495284</td>
-</tr>
 <tr class="even">
 <td style="text-align: left;">prealloc</td>
 <td style="text-align: right;">10000</td>
-<td style="text-align: right;">0.14</td>
+<td style="text-align: right;">0.12</td>
 <td style="text-align: right;">1.000</td>
+<td style="text-align: right;">0.06</td>
 <td style="text-align: right;">0.07</td>
-<td style="text-align: right;">0.08</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">2.475000e+01</td>
-<td style="text-align: right;">1.6859600</td>
+<td style="text-align: right;">1.9669533</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">control</td>
 <td style="text-align: right;">10000</td>
-<td style="text-align: right;">0.15</td>
-<td style="text-align: right;">1.071</td>
-<td style="text-align: right;">0.08</td>
+<td style="text-align: right;">0.13</td>
+<td style="text-align: right;">1.083</td>
+<td style="text-align: right;">0.05</td>
 <td style="text-align: right;">0.08</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">2.475000e+01</td>
-<td style="text-align: right;">1.5735626</td>
+<td style="text-align: right;">1.8156492</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">base-r</td>
 <td style="text-align: right;">10000</td>
 <td style="text-align: right;">0.25</td>
-<td style="text-align: right;">1.786</td>
-<td style="text-align: right;">0.17</td>
-<td style="text-align: right;">0.08</td>
+<td style="text-align: right;">2.083</td>
+<td style="text-align: right;">0.14</td>
+<td style="text-align: right;">0.11</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">2.475000e+01</td>
@@ -372,152 +382,152 @@ R-base serialize needs a lot of re-allocations with larger data:
 <td style="text-align: right;">1000</td>
 <td style="text-align: right;">0.03</td>
 <td style="text-align: right;">1.000</td>
-<td style="text-align: right;">0.00</td>
-<td style="text-align: right;">0.03</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">7.817188e+01</td>
-<td style="text-align: right;">2.4850170</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">control</td>
-<td style="text-align: right;">1000</td>
-<td style="text-align: right;">0.03</td>
-<td style="text-align: right;">1.000</td>
-<td style="text-align: right;">0.00</td>
-<td style="text-align: right;">0.04</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">7.817188e+01</td>
-<td style="text-align: right;">2.4850170</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">base-r</td>
-<td style="text-align: right;">1000</td>
-<td style="text-align: right;">0.08</td>
-<td style="text-align: right;">2.667</td>
-<td style="text-align: right;">0.07</td>
+<td style="text-align: right;">0.02</td>
 <td style="text-align: right;">0.01</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">7.817188e+01</td>
-<td style="text-align: right;">0.9318814</td>
+<td style="text-align: right;">2.4850170</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">control</td>
 <td style="text-align: right;">1000</td>
-<td style="text-align: right;">0.10</td>
+<td style="text-align: right;">0.03</td>
 <td style="text-align: right;">1.000</td>
-<td style="text-align: right;">0.00</td>
-<td style="text-align: right;">0.09</td>
+<td style="text-align: right;">0.02</td>
+<td style="text-align: right;">0.02</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
-<td style="text-align: right;">2.470938e+02</td>
-<td style="text-align: right;">2.3564696</td>
+<td style="text-align: right;">7.817188e+01</td>
+<td style="text-align: right;">2.4850170</td>
 </tr>
 <tr class="odd">
+<td style="text-align: left;">base-r</td>
+<td style="text-align: right;">1000</td>
+<td style="text-align: right;">0.06</td>
+<td style="text-align: right;">2.000</td>
+<td style="text-align: right;">0.02</td>
+<td style="text-align: right;">0.05</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">7.817188e+01</td>
+<td style="text-align: right;">1.2425085</td>
+</tr>
+<tr class="even">
 <td style="text-align: left;">prealloc</td>
 <td style="text-align: right;">1000</td>
-<td style="text-align: right;">0.11</td>
-<td style="text-align: right;">1.100</td>
-<td style="text-align: right;">0.05</td>
+<td style="text-align: right;">0.08</td>
+<td style="text-align: right;">1.000</td>
+<td style="text-align: right;">0.01</td>
 <td style="text-align: right;">0.06</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">2.470938e+02</td>
-<td style="text-align: right;">2.1422451</td>
+<td style="text-align: right;">2.9455870</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">control</td>
+<td style="text-align: right;">1000</td>
+<td style="text-align: right;">0.09</td>
+<td style="text-align: right;">1.125</td>
+<td style="text-align: right;">0.02</td>
+<td style="text-align: right;">0.08</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">2.470938e+02</td>
+<td style="text-align: right;">2.6182996</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">base-r</td>
+<td style="text-align: right;">1000</td>
+<td style="text-align: right;">0.18</td>
+<td style="text-align: right;">2.250</td>
+<td style="text-align: right;">0.13</td>
+<td style="text-align: right;">0.07</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">2.470938e+02</td>
+<td style="text-align: right;">1.3091498</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">prealloc</td>
+<td style="text-align: right;">1000</td>
+<td style="text-align: right;">0.16</td>
+<td style="text-align: right;">1.000</td>
+<td style="text-align: right;">0.09</td>
+<td style="text-align: right;">0.06</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">7.812969e+02</td>
+<td style="text-align: right;">4.6568923</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">control</td>
 <td style="text-align: right;">1000</td>
 <td style="text-align: right;">0.20</td>
-<td style="text-align: right;">2.000</td>
-<td style="text-align: right;">0.14</td>
-<td style="text-align: right;">0.06</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">2.470938e+02</td>
-<td style="text-align: right;">1.1782348</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">prealloc</td>
-<td style="text-align: right;">1000</td>
-<td style="text-align: right;">0.17</td>
-<td style="text-align: right;">1.000</td>
-<td style="text-align: right;">0.10</td>
-<td style="text-align: right;">0.08</td>
+<td style="text-align: right;">1.250</td>
+<td style="text-align: right;">0.09</td>
+<td style="text-align: right;">0.11</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">7.812969e+02</td>
-<td style="text-align: right;">4.3829574</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">control</td>
-<td style="text-align: right;">1000</td>
-<td style="text-align: right;">0.22</td>
-<td style="text-align: right;">1.294</td>
-<td style="text-align: right;">0.08</td>
-<td style="text-align: right;">0.14</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">7.812969e+02</td>
-<td style="text-align: right;">3.3868307</td>
+<td style="text-align: right;">3.7255138</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">base-r</td>
 <td style="text-align: right;">1000</td>
-<td style="text-align: right;">0.61</td>
-<td style="text-align: right;">3.588</td>
-<td style="text-align: right;">0.45</td>
-<td style="text-align: right;">0.16</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">7.812969e+02</td>
-<td style="text-align: right;">1.2214799</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">prealloc</td>
-<td style="text-align: right;">1000</td>
-<td style="text-align: right;">1.05</td>
-<td style="text-align: right;">1.000</td>
-<td style="text-align: right;">0.68</td>
+<td style="text-align: right;">0.53</td>
+<td style="text-align: right;">3.313</td>
 <td style="text-align: right;">0.38</td>
+<td style="text-align: right;">0.15</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">7.812969e+02</td>
+<td style="text-align: right;">1.4058543</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">prealloc</td>
+<td style="text-align: right;">1000</td>
+<td style="text-align: right;">1.01</td>
+<td style="text-align: right;">1.000</td>
+<td style="text-align: right;">0.64</td>
+<td style="text-align: right;">0.37</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">2.470570e+03</td>
-<td style="text-align: right;">2.2439233</td>
+<td style="text-align: right;">2.3327915</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">control</td>
 <td style="text-align: right;">1000</td>
-<td style="text-align: right;">1.39</td>
-<td style="text-align: right;">1.324</td>
-<td style="text-align: right;">0.92</td>
-<td style="text-align: right;">0.46</td>
+<td style="text-align: right;">1.47</td>
+<td style="text-align: right;">1.455</td>
+<td style="text-align: right;">0.97</td>
+<td style="text-align: right;">0.50</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">2.470570e+03</td>
-<td style="text-align: right;">1.6950500</td>
+<td style="text-align: right;">1.6028023</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">base-r</td>
 <td style="text-align: right;">1000</td>
-<td style="text-align: right;">2.47</td>
-<td style="text-align: right;">2.352</td>
-<td style="text-align: right;">1.92</td>
-<td style="text-align: right;">0.51</td>
+<td style="text-align: right;">2.28</td>
+<td style="text-align: right;">2.257</td>
+<td style="text-align: right;">1.75</td>
+<td style="text-align: right;">0.54</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">2.470570e+03</td>
-<td style="text-align: right;">0.9538945</td>
+<td style="text-align: right;">1.0333857</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">control</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0.03</td>
 <td style="text-align: right;">1.000</td>
-<td style="text-align: right;">0.00</td>
 <td style="text-align: right;">0.03</td>
+<td style="text-align: right;">0.00</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">7.812547e+03</td>
@@ -540,8 +550,8 @@ R-base serialize needs a lot of re-allocations with larger data:
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0.08</td>
 <td style="text-align: right;">2.667</td>
-<td style="text-align: right;">0.03</td>
-<td style="text-align: right;">0.05</td>
+<td style="text-align: right;">0.08</td>
+<td style="text-align: right;">0.00</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">7.812547e+03</td>
@@ -550,118 +560,118 @@ R-base serialize needs a lot of re-allocations with larger data:
 <tr class="even">
 <td style="text-align: left;">prealloc</td>
 <td style="text-align: right;">10</td>
-<td style="text-align: right;">0.09</td>
+<td style="text-align: right;">0.11</td>
 <td style="text-align: right;">1.000</td>
-<td style="text-align: right;">0.08</td>
+<td style="text-align: right;">0.10</td>
 <td style="text-align: right;">0.01</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">2.470534e+04</td>
-<td style="text-align: right;">2.6178716</td>
+<td style="text-align: right;">2.1418949</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">control</td>
 <td style="text-align: right;">10</td>
-<td style="text-align: right;">0.20</td>
-<td style="text-align: right;">2.222</td>
-<td style="text-align: right;">0.12</td>
-<td style="text-align: right;">0.08</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">2.470534e+04</td>
-<td style="text-align: right;">1.1780422</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">base-r</td>
-<td style="text-align: right;">10</td>
-<td style="text-align: right;">0.36</td>
-<td style="text-align: right;">4.000</td>
-<td style="text-align: right;">0.32</td>
+<td style="text-align: right;">0.23</td>
+<td style="text-align: right;">2.091</td>
+<td style="text-align: right;">0.18</td>
 <td style="text-align: right;">0.05</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">2.470534e+04</td>
-<td style="text-align: right;">0.6544679</td>
+<td style="text-align: right;">1.0243845</td>
 </tr>
-<tr class="odd">
-<td style="text-align: left;">prealloc</td>
+<tr class="even">
+<td style="text-align: left;">base-r</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0.28</td>
+<td style="text-align: right;">2.545</td>
+<td style="text-align: right;">0.24</td>
+<td style="text-align: right;">0.05</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">2.470534e+04</td>
+<td style="text-align: right;">0.8414587</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">prealloc</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0.37</td>
 <td style="text-align: right;">1.000</td>
-<td style="text-align: right;">0.15</td>
-<td style="text-align: right;">0.14</td>
+<td style="text-align: right;">0.17</td>
+<td style="text-align: right;">0.20</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">7.812505e+04</td>
-<td style="text-align: right;">2.6609232</td>
+<td style="text-align: right;">2.0136716</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">control</td>
 <td style="text-align: right;">10</td>
-<td style="text-align: right;">0.89</td>
-<td style="text-align: right;">3.179</td>
-<td style="text-align: right;">0.59</td>
-<td style="text-align: right;">0.30</td>
+<td style="text-align: right;">0.80</td>
+<td style="text-align: right;">2.162</td>
+<td style="text-align: right;">0.57</td>
+<td style="text-align: right;">0.22</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">7.812505e+04</td>
-<td style="text-align: right;">0.8371444</td>
+<td style="text-align: right;">0.9313231</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">base-r</td>
 <td style="text-align: right;">10</td>
-<td style="text-align: right;">1.20</td>
-<td style="text-align: right;">4.286</td>
-<td style="text-align: right;">0.80</td>
-<td style="text-align: right;">0.40</td>
+<td style="text-align: right;">1.14</td>
+<td style="text-align: right;">3.081</td>
+<td style="text-align: right;">0.78</td>
+<td style="text-align: right;">0.36</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">7.812505e+04</td>
-<td style="text-align: right;">0.6208821</td>
+<td style="text-align: right;">0.6535601</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">prealloc</td>
 <td style="text-align: right;">10</td>
-<td style="text-align: right;">1.03</td>
+<td style="text-align: right;">1.00</td>
 <td style="text-align: right;">1.000</td>
-<td style="text-align: right;">0.79</td>
-<td style="text-align: right;">0.23</td>
+<td style="text-align: right;">0.72</td>
+<td style="text-align: right;">0.26</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">2.470530e+05</td>
-<td style="text-align: right;">2.2874571</td>
+<td style="text-align: right;">2.3560809</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">control</td>
 <td style="text-align: right;">10</td>
-<td style="text-align: right;">3.01</td>
-<td style="text-align: right;">2.922</td>
-<td style="text-align: right;">1.94</td>
-<td style="text-align: right;">1.08</td>
+<td style="text-align: right;">2.91</td>
+<td style="text-align: right;">2.910</td>
+<td style="text-align: right;">1.81</td>
+<td style="text-align: right;">1.09</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">2.470530e+05</td>
-<td style="text-align: right;">0.7827511</td>
+<td style="text-align: right;">0.8096498</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">base-r</td>
 <td style="text-align: right;">10</td>
-<td style="text-align: right;">3.78</td>
-<td style="text-align: right;">3.670</td>
-<td style="text-align: right;">2.75</td>
-<td style="text-align: right;">1.03</td>
+<td style="text-align: right;">3.72</td>
+<td style="text-align: right;">3.720</td>
+<td style="text-align: right;">2.81</td>
+<td style="text-align: right;">0.90</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">2.470530e+05</td>
-<td style="text-align: right;">0.6233018</td>
+<td style="text-align: right;">0.6333551</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">prealloc</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: right;">0.28</td>
 <td style="text-align: right;">1.000</td>
-<td style="text-align: right;">0.19</td>
-<td style="text-align: right;">0.10</td>
+<td style="text-align: right;">0.23</td>
+<td style="text-align: right;">0.05</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">7.812500e+05</td>
@@ -670,29 +680,36 @@ R-base serialize needs a lot of re-allocations with larger data:
 <tr class="even">
 <td style="text-align: left;">control</td>
 <td style="text-align: right;">1</td>
-<td style="text-align: right;">1.05</td>
-<td style="text-align: right;">3.750</td>
-<td style="text-align: right;">0.75</td>
-<td style="text-align: right;">0.30</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">3.571</td>
+<td style="text-align: right;">0.72</td>
+<td style="text-align: right;">0.29</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">7.812500e+05</td>
-<td style="text-align: right;">0.7095791</td>
+<td style="text-align: right;">0.7450581</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">base-r</td>
 <td style="text-align: right;">1</td>
-<td style="text-align: right;">1.38</td>
-<td style="text-align: right;">4.929</td>
-<td style="text-align: right;">1.03</td>
-<td style="text-align: right;">0.35</td>
+<td style="text-align: right;">1.30</td>
+<td style="text-align: right;">4.643</td>
+<td style="text-align: right;">1.05</td>
+<td style="text-align: right;">0.25</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">7.812500e+05</td>
-<td style="text-align: right;">0.5398972</td>
+<td style="text-align: right;">0.5731216</td>
 </tr>
 </tbody>
 </table>
+
+</details>
+
+Preallocation is around 3 times faster starting form around 10 MB:
+
+(Control mimics the R-base strategy, but has the same calling
+conventions and overhead as prealloc)
 
     library(ggplot2)
     ggplot(df, aes(df$object_size_kb, df$bandwidth_gbps, color = df$test)) +
@@ -701,7 +718,10 @@ R-base serialize needs a lot of re-allocations with larger data:
       geom_line() +
       scale_x_log10()
 
-![](README_files/figure-markdown_strict/unnamed-chunk-3-1.png)
+![](README_files/figure-markdown_strict/unnamed-chunk-5-1.png)
+
+Control shows that prealloc being slower with very small object is
+caused by calling convention:
 
     ggplot(df, aes(df$object_size_kb, df$relative, color = df$test)) +
       labs(x = "Object size (KB)", y = "Relative performance (lower is better)") +
@@ -709,7 +729,7 @@ R-base serialize needs a lot of re-allocations with larger data:
       geom_line() +
       scale_x_log10()
 
-![](README_files/figure-markdown_strict/unnamed-chunk-3-2.png)
+![](README_files/figure-markdown_strict/unnamed-chunk-6-1.png)
 
 Still faster using heavily nested objects:
 
@@ -754,38 +774,64 @@ Still faster using heavily nested objects:
 <tr class="odd">
 <td style="text-align: left;">prealloc</td>
 <td style="text-align: right;">100</td>
-<td style="text-align: right;">4.88</td>
+<td style="text-align: right;">4.64</td>
 <td style="text-align: right;">1.000</td>
-<td style="text-align: right;">4.61</td>
-<td style="text-align: right;">0.27</td>
+<td style="text-align: right;">4.47</td>
+<td style="text-align: right;">0.17</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">114687.9</td>
-<td style="text-align: right;">2.241290</td>
+<td style="text-align: right;">2.357219</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">base-r</td>
 <td style="text-align: right;">100</td>
-<td style="text-align: right;">5.22</td>
-<td style="text-align: right;">1.070</td>
-<td style="text-align: right;">4.84</td>
-<td style="text-align: right;">0.36</td>
+<td style="text-align: right;">5.04</td>
+<td style="text-align: right;">1.086</td>
+<td style="text-align: right;">4.64</td>
+<td style="text-align: right;">0.41</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">114687.9</td>
-<td style="text-align: right;">2.095305</td>
+<td style="text-align: right;">2.170138</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">control</td>
 <td style="text-align: right;">100</td>
-<td style="text-align: right;">5.35</td>
-<td style="text-align: right;">1.096</td>
-<td style="text-align: right;">4.81</td>
-<td style="text-align: right;">0.49</td>
+<td style="text-align: right;">5.14</td>
+<td style="text-align: right;">1.108</td>
+<td style="text-align: right;">4.73</td>
+<td style="text-align: right;">0.41</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">114687.9</td>
-<td style="text-align: right;">2.044391</td>
+<td style="text-align: right;">2.127917</td>
 </tr>
 </tbody>
 </table>
+
+Testing Platform
+
+    R.version
+
+    ##                _                                
+    ## platform       x86_64-w64-mingw32               
+    ## arch           x86_64                           
+    ## os             mingw32                          
+    ## crt            ucrt                             
+    ## system         x86_64, mingw32                  
+    ## status                                          
+    ## major          4                                
+    ## minor          2.0                              
+    ## year           2022                             
+    ## month          04                               
+    ## day            22                               
+    ## svn rev        82229                            
+    ## language       R                                
+    ## version.string R version 4.2.0 (2022-04-22 ucrt)
+    ## nickname       Vigorous Calisthenics
+
+Processor 12th Gen Intel(R) Core(TM) i7-12700K, 3610 Mhz, 12 Core(s), 20
+Logical Processor(s)
+
+32 GB RAM
